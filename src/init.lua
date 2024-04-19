@@ -34,7 +34,8 @@ export type Constructor = {
 --// Variables
 local module = {__remotes = {}} :: Constructor
 local IsServer = RunService:IsServer()
-local voidFunction = (function()end)()
+local voidFunction = (function()end)
+local void = voidFunction()
 
 local Exceptions = { -- | 오류메세지 모음
     INVALID_KEY = "%s is not a property of %s";
@@ -92,7 +93,11 @@ end
 
 -- | 타임아웃 시킨 쓰레드 다시시작
 local function ResolveTimeout(self, SessionId)
-    task.spawn(self.__handlingThreads[SessionId][1], true)
+    local SessionData = self.__handlingThreads[SessionId]
+
+    self.__handlingThreads[SessionId] = void
+
+    task.spawn(SessionData[1], true)
 end
 
 -- | 세션 uid 생성
@@ -208,7 +213,7 @@ function module:InvokeServer(...)
     end
 
     if not IsSucceed then
-        error(Response[1], 2)
+        assert(not (IsTimeout and self.ErrorWhenTimedOut), Response[1], 2)
     end
 
     return table.unpack(Response)
