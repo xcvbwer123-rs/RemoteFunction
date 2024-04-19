@@ -210,10 +210,12 @@ function module:InvokeServer(...)
 
     if IsTimeout and #Response == 0 then
         assert(not self.ErrorWhenTimedOut, Exceptions.TIMEOUT_MESSAGE, 2)
+
+        return
     end
 
     if not IsSucceed then
-        assert(not (IsTimeout and self.ErrorWhenTimedOut), Response[1], 2)
+        error(Response[1], 2)
     end
 
     return table.unpack(Response)
