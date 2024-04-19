@@ -145,7 +145,7 @@ local function HandleEvent(RemoteEvent: RemoteEvent)
 
             if typeof(IsResponse) == "boolean" and typeof(SessionId) == "string" and #SessionId == 36 then
                 if not IsResponse then
-                    RemoteEvent:FireClient(Player, SessionId, true, pcall(self.__handler, Player, ...))
+                    RemoteEvent:FireClient(Player, true, SessionId, pcall(RemoteFunction.__handler, Player, ...))
                 elseif RemoteFunction.__handlingThreads[SessionId] then
                     local ThraedData = RemoteFunction.__handlingThreads[SessionId]
 
@@ -167,8 +167,18 @@ local function HandleEvent(RemoteEvent: RemoteEvent)
             if not RemoteFunction then RemoteFunction = module.__remotes[RemoteName] end
 
             if typeof(IsResponse) == "boolean" and typeof(SessionId) == "string" and #SessionId == 36 then
-                if IsResponse then
-                    
+                if not IsResponse then
+                    RemoteEvent:FireServer(true, SessionId, pcall(RemoteFunction.__handler, ...))
+                elseif RemoteFunction.__handlingThreads[SessionId] then
+                    local ThraedData = RemoteFunction.__handlingThreads[SessionId]
+
+                    RemoteFunction.__handlingThreads[SessionId] = void
+
+                    task.cancel(ThraedData[2])
+                    task.spawn(ThraedData[1], false, ...)
+
+                    table.clear(ThraedData)
+                    ThraedData = void
                 end
             end
         end)
