@@ -244,6 +244,14 @@ function module:InvokeClient(Player: Player, ...)
     return table.unpack(Response)
 end
 
+function module:Fire(...)
+    if IsServer then
+        return self:InvokeClient(...)
+    else
+        return self:InvokeServer(...)
+    end
+end
+
 function module:__tostring()
     assert(module ~= self, Exceptions.TRIED_TO_CALL_CONTRUCTOR, 2)
 
