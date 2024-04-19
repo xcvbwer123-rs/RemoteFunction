@@ -90,28 +90,6 @@ local function GetRemoteEvent(Name: string)
     end
 end
 
--- | 리모트 오브젝트 생성
-local function ReferenceRemote(Name: string)
-    if module.__remotes[Name] then
-        return module.__remotes[Name]
-    else
-        local RemoteFunction = {
-            __name = Name;
-            __event = GetRemoteEvent(Name);
-            __handlingThreads = {};
-            __handler = voidFunction;
-            __timeout = 10;
-
-            ErrorWhenTimedOut = true;
-        }
-
-        HandleEvent(self.__event)
-        setmetatable(RemoteFunction, module)
-    
-        return RemoteFunction
-    end
-end
-
 -- | 타임아웃 시킨 쓰레드 다시시작
 local function ResolveTimeout(self, SessionId)
     task.spawn(self.__handlingThreads[SessionId][1], true)
@@ -182,6 +160,28 @@ local function HandleEvent(RemoteEvent: RemoteEvent)
                 end
             end
         end)
+    end
+end
+
+-- | 리모트 오브젝트 생성
+local function ReferenceRemote(Name: string)
+    if module.__remotes[Name] then
+        return module.__remotes[Name]
+    else
+        local RemoteFunction = {
+            __name = Name;
+            __event = GetRemoteEvent(Name);
+            __handlingThreads = {};
+            __handler = voidFunction;
+            __timeout = 10;
+
+            ErrorWhenTimedOut = true;
+        }
+
+        HandleEvent(RemoteFunction.__event)
+        setmetatable(RemoteFunction, module)
+    
+        return RemoteFunction
     end
 end
 
