@@ -168,7 +168,7 @@ local function ReferenceRemote(Name: string)
     if module.__remotes[Name] then
         return module.__remotes[Name]
     else
-        local RemoteFunction = {
+        local RemoteFunction = setmetatable({
             __name = Name;
             __event = GetRemoteEvent(Name);
             __handlingThreads = {};
@@ -176,10 +176,10 @@ local function ReferenceRemote(Name: string)
             __timeout = 10;
 
             ErrorWhenTimedOut = true;
-        }
-
+        }, module)
+        
+        module.__remotes[Name] = RemoteFunction
         HandleEvent(RemoteFunction.__event)
-        setmetatable(RemoteFunction, module)
     
         return RemoteFunction
     end
@@ -197,7 +197,7 @@ function module:InvokeServer(...)
 
     self.__handlingThreads[SessionId] = {RunningThread, TimeoutThread}
 
-    self.__event:FireServer(SessionId, ...)
+    self.__event:FireServer(false, SessionId, ...)
 
     local Response = {coroutine.yield()}
     local IsTimeout = table.remove(Response, 1)
@@ -225,7 +225,7 @@ function module:InvokeClient(Player: Player, ...)
 
     self.__handlingThreads[SessionId] = {RunningThread, TimeoutThread}
 
-    self.__event:FireClient(Player, SessionId, ...)
+    self.__event:FireClient(Player, false, SessionId, ...)
 
     local Response = {coroutine.yield()}
     local IsTimeout = table.remove(Response, 1)
