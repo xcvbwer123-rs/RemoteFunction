@@ -247,6 +247,10 @@ function module:__index(Key: string)
     assert(module ~= self, Exceptions.TRIED_TO_CALL_CONTRUCTOR, 2)
     assert(not ConstructorOnly[Key] and (Keys[Key] ~= nil or rawget(module, Key) ~= nil), Exceptions.INVALID_KEY:format(Key, tostring(self)), 2)
 
+    if typeof(rawget(module, Key)) == "function" and not ConstructorOnly[Key] then
+        return rawget(module, Key)
+    end
+
     return rawget(self, rawget(AltPaths, Key))
 end
 
